@@ -1,27 +1,22 @@
 package com.kotlinspring.exceptionhandler
 
 import com.kotlinspring.exception.InstructorNotValidException
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.lang.Nullable
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
-import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
-import java.time.LocalDateTime
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 @ControllerAdvice
 class GlobalErrorHandler : ResponseEntityExceptionHandler() {
 
-    companion object : KLogging()
+    private val logger = KotlinLogging.logger {}
 
     override fun handleMethodArgumentNotValid(
         ex: MethodArgumentNotValidException,
@@ -29,7 +24,7 @@ class GlobalErrorHandler : ResponseEntityExceptionHandler() {
         status: HttpStatus,
         request: WebRequest
     ): ResponseEntity<Any> {
-        logger.error("MethodArgumentNotValidException observed : ${ex.message}", ex)
+        logger.error(ex) { "MethodArgumentNotValidException observed : ${ex.message}" }
         val errors = ex.bindingResult.allErrors
             .map { error -> error.defaultMessage!! }
             .sorted()
@@ -42,7 +37,7 @@ class GlobalErrorHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(InstructorNotValidException::class)
     fun handleInputRequestError(ex: InstructorNotValidException, request: WebRequest): ResponseEntity<Any> {
-        logger.info("Exception occurred: ${ex.message} on request: $request")
+        logger.info { "Exception occurred: ${ex.message} on request: $request" }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(
                 ex.message
@@ -51,7 +46,7 @@ class GlobalErrorHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(java.lang.Exception::class)
     fun handleAllExceptions(ex: java.lang.Exception, request: WebRequest): ResponseEntity<Any> {
-        logger.info("Exception occurred: ${ex.message} on request: $request", ex)
+        logger.error(ex) { "Exception occurred: ${ex.message} on request: $request" }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(
                 ex.message

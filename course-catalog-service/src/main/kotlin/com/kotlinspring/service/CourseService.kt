@@ -5,14 +5,14 @@ import com.kotlinspring.entity.Course
 import com.kotlinspring.exception.CourseNotFoundException
 import com.kotlinspring.exception.InstructorNotValidException
 import com.kotlinspring.repository.CourseRepository
-import mu.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 
 @Service
 class CourseService(val courseRepository: CourseRepository,
 val instructorService: InstructorService) {
 
-    companion object : KLogging()
+    private val logger = KotlinLogging.logger {}
 
     fun addCourse(courseDTO: CourseDTO): CourseDTO {
 
@@ -27,7 +27,7 @@ val instructorService: InstructorService) {
 
         courseRepository.save(courseEntity)
 
-       logger.info("Saved Course is : $courseEntity")
+       logger.info { "Saved Course is : $courseEntity" }
 
         return courseEntity.let {
             //CourseDTO(it.id!!, it.name, it.category)
